@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Brainly++
 // @namespace https://github.com/sirmonteiro
-// @version 1.0.1
+// @version 1.0.2
 // @description Remove the limitation of viewing answers in Brainly
 // @description:pt-BR Remove a limitação de ver respostas no Brainly
 // @author SirMonteiro
@@ -15,17 +15,20 @@
 // @match *://*brainly.lat/*
 // @match *://*brainly.pl/*
 // @match *://*brainly.com.br/*
+// @match *://*znanija.com/*
+// @match *://*nosdevoirs.fr/*
+// @match *://*eodev.com/*
 // @grant GM.addStyle
 // ==/UserScript==
 GM.addStyle(`
-.js-react-bottom-banner, .js-react-brainly-plus-box-aside, .sg-overlay, .brn-cookie-policy-wrapper, .section--3Yobl {
-    display: none;
-}
+    aside, .ads_banner, [data-testid*="ad_below"]{
+      display: none !important;
+    }
+     
+    #main-content {
+      grid-template-columns: 800px;
+    }
+    `);
 
-.brn-qpage-layout--aligned, .brn-qpage-layout {
-    grid-template-columns: 700px;
-}
-`);
-
-localStorage.setItem("flexible-funnel-last-access-data", 0);
-localStorage.setItem("flexible-funnel-cycle-start", 0);
+localStorage.setItem("ads-pis", []);
+localStorage.setItem("social-qa/telemetry", {});
