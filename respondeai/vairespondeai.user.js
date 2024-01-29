@@ -9,30 +9,48 @@
 // @run-at document-body
 // @grant GM.addStyle
 // ==/UserScript==
-GM.addStyle(`
-.paywall *, .blur-content *, .blurs *, .paywall::before, .blur-content::before {
-    filter: none !important;
-    -webkit-filter: none !important;
-    backdrop-filter: none !important;
-}
 
-[class*="Paywall"], [class*="BannerContainer"] {
-    display: none !important;
-}
-`);
+(function () {
+  "use strict";
+  GM.addStyle(`
+    .paywall *, .blur-content *, .blurs *, .paywall::before, .blur-content::before {
+        filter: none !important;
+        -webkit-filter: none !important;
+        backdrop-filter: none !important;
+    }
 
-var counter = 0;
-var intv = setInterval(function () {
-  if (counter == 150) clearInterval(intv);
-  counter++;
-  var elem = document.getElementsByClassName("ReactModal__Content");
-  if (elem.length < 1) return false;
-  var elem2 = document.querySelector('[class*="' + "Loading__Container" + '"]');
-  if (elem2) return false;
-  clearInterval(intv);
-  elem[0].firstChild.click();
-  elem[0].firstChild.firstChild.firstChild.click();
-  document.querySelector(
-    '[class*="' + "NoAccessDisclaimer" + '"]'
-  ).style.display = "none";
-}, 200);
+    [class*="Paywall"], [class*="BannerContainer"] {
+        display: none !important;
+    }
+    `);
+
+  const elementsToRemove = ["[class*='NoAccessDisclaimer']"];
+  const elementsToClick = [".ReactModal__Content"];
+  const config = { attributes: true, childList: true, subtree: true };
+  let timeoutID = 0;
+  let mutationObserver;
+  const mutationCallback = () => {
+    mutationObserver.disconnect();
+    for (let query of elementsToRemove) {
+      let nodes = document.querySelectorAll(query);
+      for (let node of nodes) node.remove();
+    }
+    for (let query of elementsToClick) {
+      let nodes = document.querySelectorAll(query);
+      for (let node of nodes)
+        if (timeoutID === 0)
+          timeoutID = setTimeout(() => {
+            timeoutID = 0;
+            node.click();
+            node.firstChild.click();
+            node.firstChild.firstChild.firstChild.click();
+          }, 500);
+    }
+    mutationObserver.observe(document.body, config);
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    mutationObserver = new MutationObserver(mutationCallback);
+    mutationCallback();
+  });
+})();
